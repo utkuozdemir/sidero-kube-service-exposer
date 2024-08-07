@@ -46,10 +46,6 @@ func NewMapper(ipSetProvider SetProvider, loadBalancerController LoadBalancerPro
 		return nil, fmt.Errorf("ipSetProvider must not be nil")
 	}
 
-	if loadBalancerController == nil {
-		loadBalancerController = &TCPLoadBalancerProvider{}
-	}
-
 	if logger == nil {
 		logger = zap.NewNop()
 	}

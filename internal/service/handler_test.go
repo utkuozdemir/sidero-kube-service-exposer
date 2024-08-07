@@ -45,16 +45,16 @@ func TestHandlerCreate(t *testing.T) {
 
 	logger := zaptest.NewLogger(t)
 
-	_, err := service.NewHandler("test", nil, logger)
+	_, err := service.NewHandler("test", nil, nil, logger)
 	assert.ErrorContains(t, err, "must not be nil")
 
-	_, err = service.NewHandler("", &mockIPMapper{}, logger)
+	_, err = service.NewHandler("", &mockIPMapper{}, nil, logger)
 	assert.ErrorContains(t, err, "invalid annotation key")
 
-	_, err = service.NewHandler("invalid key 1", &mockIPMapper{}, logger)
+	_, err = service.NewHandler("invalid key 1", &mockIPMapper{}, nil, logger)
 	assert.ErrorContains(t, err, "invalid annotation key")
 
-	handler, err := service.NewHandler("valid-key", &mockIPMapper{}, logger)
+	handler, err := service.NewHandler("valid-key", &mockIPMapper{}, nil, logger)
 	assert.NoError(t, err)
 	assert.NotNil(t, handler)
 }
@@ -66,7 +66,7 @@ func TestHandlerHandle(t *testing.T) {
 
 	mapper := mockIPMapper{}
 
-	handler, err := service.NewHandler("test", &mapper, logger)
+	handler, err := service.NewHandler("test", &mapper, nil, logger)
 	assert.NoError(t, err)
 
 	assert.ErrorContains(t, handler.Handle(nil), "must not be nil")
@@ -179,7 +179,7 @@ func TestHandlerHandleDelete(t *testing.T) {
 
 	mapper := mockIPMapper{}
 
-	handler, err := service.NewHandler("test", &mapper, logger)
+	handler, err := service.NewHandler("test", &mapper, nil, logger)
 	assert.NoError(t, err)
 
 	assert.ErrorContains(t, handler.HandleDelete(""), "must not be empty")

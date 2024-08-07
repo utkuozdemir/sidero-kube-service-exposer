@@ -5,6 +5,10 @@
 package ip
 
 import (
+	"errors"
+	"fmt"
+	"net"
+
 	"github.com/siderolabs/go-loadbalancer/loadbalancer"
 	"github.com/siderolabs/go-loadbalancer/upstream"
 	"go.uber.org/zap"
@@ -31,5 +35,27 @@ func (t *TCPLoadBalancerProvider) New(logger *zap.Logger) (LoadBalancer, error) 
 		logger = zap.NewNop()
 	}
 
-	return &loadbalancer.TCP{Logger: logger}, nil
+	return &tcpLoadBalancer{
+		TCP: loadbalancer.TCP{
+			Logger: logger,
+		},
+	}, nil
+}
+
+// tcpLoadBalancer is a wrapper around loadbalancer.TCP.
+type tcpLoadBalancer struct {
+	loadbalancer.TCP
+}
+
+// Close closes the TCP load balancer and waits for it to stop.
+func (lb *tcpLoadBalancer) Close() error {
+	if err := lb.TCP.Close(); err != nil {
+		return fmt.Errorf("failed to close TCP load balancer: %w", err)
+	}
+
+	if err := lb.TCP.Wait(); err != nil && !errors.Is(err, net.ErrClosed) {
+		return fmt.Errorf("failed to wait for TCP load balancer: %w", err)
+	}
+
+	return nil
 }

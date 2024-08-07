@@ -72,7 +72,7 @@ func TestMapperCreate(t *testing.T) {
 	_, err := ip.NewMapper(nil, nil, logger)
 	assert.ErrorContains(t, err, "must not be nil")
 
-	mapper, err := ip.NewMapper(&mockIPSetProvider{}, nil, logger)
+	mapper, err := ip.NewMapper(&mockIPSetProvider{}, &ip.TCPLoadBalancerProvider{}, logger)
 	assert.NoError(t, err)
 
 	assert.NotNil(t, mapper)

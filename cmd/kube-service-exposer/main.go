@@ -22,8 +22,9 @@ import (
 )
 
 var rootCmdArgs struct {
-	annotationKey string
-	bindCIDRs     []string
+	annotationKey            string
+	bindCIDRs                []string
+	disallowedHostPortRanges []string
 
 	debug bool
 }
@@ -57,7 +58,7 @@ var rootCmd = &cobra.Command{
 
 		controllerruntimelog.SetLogger(zapr.NewLogger(logger))
 
-		exposer, err := exposer.New(rootCmdArgs.annotationKey, rootCmdArgs.bindCIDRs, logger.With(zap.String("component", "exposer")))
+		exposer, err := exposer.New(rootCmdArgs.annotationKey, rootCmdArgs.bindCIDRs, rootCmdArgs.disallowedHostPortRanges, logger.With(zap.String("component", "exposer")))
 		if err != nil {
 			return err
 		}
@@ -77,7 +78,9 @@ func main() {
 func init() {
 	rootCmd.Flags().StringVarP(&rootCmdArgs.annotationKey, "annotation-key", "a", version.Name+".sidero.dev/port",
 		"the annotation key to be looked for on the services to determine which port to expose ot from.")
-	rootCmd.Flags().StringSliceVarP(&rootCmdArgs.bindCIDRs, "bind-cidrs", "b", []string{},
+	rootCmd.Flags().StringSliceVarP(&rootCmdArgs.bindCIDRs, "bind-cidrs", "b", nil,
 		"the CIDRs to match the host IPs with. Only the ports on the IPs that match these CIDRs will be listened. When empty, all IPs will be listened.")
+	rootCmd.Flags().StringSliceVar(&rootCmdArgs.disallowedHostPortRanges, "disallowed-host-port-ranges", nil,
+		"the port ranges on the host that are not allowed to be used. When a disallowed host port is attempted to be exposed, it will be skipped and a warning will be logged.")
 	rootCmd.Flags().BoolVar(&rootCmdArgs.debug, "debug", false, "enable debug logs.")
 }
